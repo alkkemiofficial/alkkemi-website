@@ -82,6 +82,8 @@ const AlkkemiWebsite = () => {
     company: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('');
 
   const handleInputChange = (e) => {
     setFormData({
@@ -90,14 +92,53 @@ const AlkkemiWebsite = () => {
     });
   };
 
-  const handleSubmit = () => {
-    alert("Thank you for your message! We'll get back to you soon.");
-    setFormData({
-      name: '',
-      email: '',
-      company: '',
-      message: ''
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.message) {
+      setSubmitStatus('Please fill in all required fields.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setSubmitStatus('');
+    
+    try {
+      // Using Formspree with environment variable
+      const formspreeEndpoint = process.env.REACT_APP_FORMSPREE_ENDPOINT;
+      const response = await fetch(formspreeEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          message: formData.message,
+          _replyto: formData.email, // This sets the reply-to address
+          _subject: `New contact from ${formData.name} - Alkkemi Website`
+        }),
+      });
+      
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          name: '',
+          email: '',
+          company: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -112,9 +153,9 @@ const AlkkemiWebsite = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <img 
-                src="/alkkemilogo.png" 
+                src="/logo.png" 
                 alt="Alkkemi" 
-                className="h-8 object-contain transition-opacity duration-500"
+                className="h-12 object-contain transition-opacity duration-500"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   e.target.nextSibling.style.display = 'inline-block';
@@ -263,8 +304,8 @@ const AlkkemiWebsite = () => {
             {[
               { number: "$184B", label: "Mobile Learning Market by 2028" },
               { number: "1.47M", label: "Japanese Proficiency Test Takers (2024)" },
-              { number: "25.86%", label: "Growth in Japanese Learners" },
-              { number: "6.57%", label: "Japanese Learning Market CAGR" }
+              { number: "74.14%", label: "Gap Covered in Japanese Learners" },
+              { number: "1.14x", label: "TOPIK Korean Test Takers (2024)" }
             ].map((stat, index) => (
               <div
                 key={index}
@@ -318,7 +359,7 @@ const AlkkemiWebsite = () => {
               "It doesn't have to be often, it just has to be consistent."
             </blockquote>
             
-            <div className="text-lg lg:text-xl leading-relaxed space-y-6">
+            <div className="text-lg lg:text-xl leading-relaxed space-y-6 mb-12">
               <p>
                 We believe that language learning should be accessible, engaging, and sustainable. 
                 Our mission is to create a comprehensive platform that brings together all the tools 
@@ -329,6 +370,34 @@ const AlkkemiWebsite = () => {
                 gamified learning experiences, we're revolutionizing how people approach language 
                 acquisition in the digital age.
               </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-2xl border border-white border-opacity-20">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center mb-6 mx-auto">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-center">Hone Language Skills</h3>
+                <p className="text-base leading-relaxed opacity-90">
+                  To hone second language skills in reading, listening, and speaking by providing fun materials, 
+                  real-world context, and resources that foster study responsibility.
+                </p>
+              </div>
+
+              <div className="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-2xl border border-white border-opacity-20">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center mb-6 mx-auto">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-center">Build Confidence</h3>
+                <p className="text-base leading-relaxed opacity-90">
+                  To be the go-to resource for language learners to become fluent in a language and help users 
+                  become more confident in their skills.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -370,17 +439,18 @@ const AlkkemiWebsite = () => {
                 name: "Rachel Krantz",
                 title: "CEO & Founder", 
                 education: "BA in Entrepreneurship & Business Analytics\nEast Asian Languages",
-                initials: "RK",
+                image: "rachel.jpg",
+                linkedin: "https://linkedin.com/in/rakrantz/",
                 gradient: "from-pink-500 to-orange-500"
               },
               {
                 name: "Deepak Pagadala",
                 title: "CTO & Founder",
                 education: "B.Tech in Computer Science Engineering\nMS in Data Science",
-                initials: "DP",
+                image: "deepak.jpg",
+                linkedin: "https://linkedin.com/in/nagadeepakpagadala",
                 gradient: "from-blue-500 to-purple-600"
-              }
-              
+              }              
             ].map((member, index) => (
               <div
                 key={index}
@@ -390,14 +460,38 @@ const AlkkemiWebsite = () => {
                   isVisible[`member-${index}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
               >
-                <div className={`w-32 h-32 bg-gradient-to-br ${member.gradient} rounded-full mx-auto mb-6 flex items-center justify-center text-white text-3xl font-bold shadow-lg`}>
-                  {member.initials}
+                <div className="relative mx-auto mb-6 w-32 h-32">
+                  <img 
+                    src={`/${member.image}`} 
+                    alt={member.name}
+                    className="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-white"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className={`w-32 h-32 bg-gradient-to-br ${member.gradient} rounded-full hidden items-center justify-center text-white text-3xl font-bold shadow-lg`}>
+                    {member.name.split(' ').map(n => n[0]).join('')}
+                  </div>
                 </div>
+                
                 <h3 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-2">{member.name}</h3>
                 <div className={`bg-gradient-to-r ${member.gradient} bg-clip-text text-transparent font-medium mb-4`}>{member.title}</div>
-                <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-line mb-6">
                   {member.education}
                 </div>
+                
+                <a 
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${member.gradient} text-white rounded-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}
+                >
+                  <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  Connect on LinkedIn
+                </a>
               </div>
             ))}
           </div>
@@ -428,32 +522,56 @@ const AlkkemiWebsite = () => {
             Get In Touch
           </h2>
           
-          <div 
+          <form 
             data-animate
             id="contact-form"
+            onSubmit={handleSubmit}
             className={`max-w-2xl mx-auto bg-white bg-opacity-5 backdrop-blur-xl p-8 lg:p-12 rounded-3xl border border-white border-opacity-10 transition-all duration-1000 ${
               isVisible['contact-form'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
+            {/* Status Messages */}
+            {submitStatus === 'success' && (
+              <div className="mb-6 p-4 bg-green-500 bg-opacity-20 border border-green-400 rounded-xl text-green-200 text-center">
+                Thank you! Your message has been sent successfully. We'll get back to you soon.
+              </div>
+            )}
+            
+            {submitStatus === 'error' && (
+              <div className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 rounded-xl text-red-200 text-center">
+                Sorry, there was an error sending your message. Please try again or email us directly.
+              </div>
+            )}
+            
+            {submitStatus && submitStatus !== 'success' && submitStatus !== 'error' && (
+              <div className="mb-6 p-4 bg-yellow-500 bg-opacity-20 border border-yellow-400 rounded-xl text-yellow-200 text-center">
+                {submitStatus}
+              </div>
+            )}
+
             <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div className="text-left">
-                <label className="block text-sm font-medium mb-2">Name</label>
+                <label className="block text-sm font-medium mb-2">Name *</label>
                 <input
                   type="text"
                   name="name"
+                  required
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 border border-white border-opacity-20"
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 border border-white border-opacity-20 disabled:opacity-50"
                 />
               </div>
               <div className="text-left">
-                <label className="block text-sm font-medium mb-2">Email</label>
+                <label className="block text-sm font-medium mb-2">Email *</label>
                 <input
                   type="email"
                   name="email"
+                  required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 border border-white border-opacity-20"
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 border border-white border-opacity-20 disabled:opacity-50"
                 />
               </div>
             </div>
@@ -465,29 +583,43 @@ const AlkkemiWebsite = () => {
                 name="company"
                 value={formData.company}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 border border-white border-opacity-20"
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 border border-white border-opacity-20 disabled:opacity-50"
               />
             </div>
             
             <div className="mb-8 text-left">
-              <label className="block text-sm font-medium mb-2">Message</label>
+              <label className="block text-sm font-medium mb-2">Message *</label>
               <textarea
                 name="message"
                 rows="5"
+                required
                 value={formData.message}
                 onChange={handleInputChange}
+                disabled={isSubmitting}
                 placeholder="Tell us about your interest in Alkkemi..."
-                className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 resize-none border border-white border-opacity-20"
+                className="w-full px-4 py-3 rounded-xl bg-white bg-opacity-10 backdrop-blur-sm text-white placeholder-gray-300 focus:bg-opacity-20 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-300 resize-none border border-white border-opacity-20 disabled:opacity-50"
               />
             </div>
             
             <button
-              onClick={handleSubmit}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-8 py-4 rounded-full font-medium text-lg tracking-wide uppercase transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/25"
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed px-8 py-4 rounded-full font-medium text-lg tracking-wide uppercase transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/25 disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center min-w-[200px]"
             >
-              Send Message
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                'Send Message'
+              )}
             </button>
-          </div>
+          </form>
         </div>
         
         {/* Floating Elements */}
