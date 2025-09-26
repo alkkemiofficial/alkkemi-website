@@ -5,6 +5,12 @@ const AlkkemiWebsite = () => {
   const [isVisible, setIsVisible] = useState({});
   const [isNavDark, setIsNavDark] = useState(false);
 
+  // GA4 Event Tracking Function
+  const trackEvent = (eventName, parameters = {}) => {
+    if (window.gtag) {
+      window.gtag('event', eventName, parameters);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,8 +77,6 @@ const AlkkemiWebsite = () => {
     };
   }, []);
 
-
-
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId).scrollIntoView({
       behavior: 'smooth'
@@ -98,9 +102,22 @@ const AlkkemiWebsite = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Track form submission attempt
+    trackEvent('form_submit_attempt', {
+      form_type: 'contact',
+      has_name: !!formData.name,
+      has_email: !!formData.email,
+      has_company: !!formData.company,
+      has_message: !!formData.message
+    });
+    
     // Basic validation
     if (!formData.name || !formData.email || !formData.message) {
       setSubmitStatus('Please fill in all required fields.');
+      trackEvent('form_validation_error', {
+        form_type: 'contact',
+        error: 'missing_required_fields'
+      });
       return;
     }
     
@@ -134,6 +151,13 @@ const AlkkemiWebsite = () => {
           company: '',
           message: ''
         });
+        
+        // Track successful form submission
+        trackEvent('form_submit_success', {
+          form_type: 'contact',
+          user_has_company: !!formData.company
+        });
+        
       } else {
         const errorData = await response.text();
         console.error('Error response:', errorData);
@@ -142,6 +166,12 @@ const AlkkemiWebsite = () => {
     } catch (error) {
       console.error('Submission error:', error);
       setSubmitStatus('error');
+      
+      // Track form submission error
+      trackEvent('form_submit_error', {
+        form_type: 'contact',
+        error_message: error.message
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -166,6 +196,11 @@ const AlkkemiWebsite = () => {
                   e.target.style.display = 'none';
                   e.target.nextSibling.style.display = 'inline-block';
                 }}
+                onClick={() => {
+                  trackEvent('logo_click', {
+                    location: 'header'
+                  });
+                }}
               />
               <span className={`font-semibold text-lg transition-colors duration-500 hidden ${
                 isNavDark ? 'text-gray-800' : 'text-white'
@@ -183,7 +218,13 @@ const AlkkemiWebsite = () => {
               ].map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => scrollToSection(item.id)}
+                  onClick={() => {
+                    trackEvent('navigation_click', {
+                      section: item.label,
+                      location: 'header'
+                    });
+                    scrollToSection(item.id);
+                  }}
                   className={`transition-colors duration-500 ${
                     isNavDark 
                       ? `text-gray-700 hover:text-blue-600 ${
@@ -200,9 +241,16 @@ const AlkkemiWebsite = () => {
             </div>
             {/* Mobile menu button */}
             <div className="md:hidden">
-              <button className={`transition-colors duration-500 ${
-                isNavDark ? 'text-gray-800' : 'text-white'
-              }`}>
+              <button 
+                className={`transition-colors duration-500 ${
+                  isNavDark ? 'text-gray-800' : 'text-white'
+                }`}
+                onClick={() => {
+                  trackEvent('mobile_menu_click', {
+                    location: 'header'
+                  });
+                }}
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -299,6 +347,12 @@ const AlkkemiWebsite = () => {
                   isVisible[`feature-${index}`] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
                 style={{ animationDelay: `${index * 200}ms` }}
+                onClick={() => {
+                  trackEvent('feature_card_click', {
+                    feature_name: feature.title,
+                    section: 'about'
+                  });
+                }}
               >
                 <h3 className="text-xl font-semibold text-blue-600 mb-4">{feature.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{feature.description}</p>
@@ -422,8 +476,15 @@ const AlkkemiWebsite = () => {
               ].map((feature, index) => (
                 <div
                   key={index}
-                  className="flex flex-col items-center justify-center transition-all duration-500 hover:scale-105"
+                  className="flex flex-col items-center justify-center transition-all duration-500 hover:scale-105 cursor-pointer"
                   data-index={index}
+                  onClick={() => {
+                    trackEvent('mockup_click', {
+                      feature_name: feature.title,
+                      mockup_index: index,
+                      section: 'app_showcase'
+                    });
+                  }}
                 >
                   <div className="relative mb-6">
                     <div 
@@ -469,7 +530,13 @@ const AlkkemiWebsite = () => {
           >
             <p className="text-blue-200 text-lg mb-6">Ready to transform your language learning journey?</p>
             <button 
-              onClick={() => scrollToSection('contact')}
+              onClick={() => {
+                trackEvent('cta_click', {
+                  button_text: 'Join the Waitlist',
+                  section: 'app_showcase'
+                });
+                scrollToSection('contact');
+              }}
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-8 py-4 rounded-full font-medium text-lg tracking-wide uppercase transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/25 text-white"
             >
               Join the Waitlist
@@ -645,6 +712,13 @@ const AlkkemiWebsite = () => {
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => {
+                    trackEvent('social_link_click', {
+                      platform: 'linkedin',
+                      member_name: member.name,
+                      member_role: member.title
+                    });
+                  }}
                   className={`inline-flex items-center px-6 py-3 bg-gradient-to-r ${member.gradient} text-white rounded-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group`}
                 >
                   <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
@@ -765,6 +839,12 @@ const AlkkemiWebsite = () => {
             <button
               type="submit"
               disabled={isSubmitting}
+              onClick={() => {
+                trackEvent('form_submit_click', {
+                  form_type: 'contact',
+                  section: 'contact'
+                });
+              }}
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-500 disabled:to-gray-600 disabled:cursor-not-allowed px-8 py-4 rounded-full font-medium text-lg tracking-wide uppercase transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/25 disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center min-w-[200px]"
             >
               {isSubmitting ? (
