@@ -5,6 +5,7 @@ const AlkkemiWebsite = () => {
   const [isVisible, setIsVisible] = useState({});
   const [isNavDark, setIsNavDark] = useState(false);
 
+
   useEffect(() => {
     const handleScroll = () => {
       const sections = ['hero', 'about', 'mission', 'team', 'contact'];
@@ -70,6 +71,8 @@ const AlkkemiWebsite = () => {
     };
   }, []);
 
+
+
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId).scrollIntoView({
       behavior: 'smooth'
@@ -105,8 +108,9 @@ const AlkkemiWebsite = () => {
     setSubmitStatus('');
     
     try {
-      // Using Formspree with environment variable
-      const formspreeEndpoint = process.env.REACT_APP_FORMSPREE_ENDPOINT;
+      // Using Formspree - fallback to direct endpoint if env var not found
+      const formspreeEndpoint = process.env.REACT_APP_FORMSPREE_ENDPOINT || 'https://formspree.io/f/YOUR_ACTUAL_ENDPOINT_HERE';
+      
       const response = await fetch(formspreeEndpoint, {
         method: 'POST',
         headers: {
@@ -117,7 +121,7 @@ const AlkkemiWebsite = () => {
           email: formData.email,
           company: formData.company,
           message: formData.message,
-          _replyto: formData.email, // This sets the reply-to address
+          _replyto: formData.email,
           _subject: `New contact from ${formData.name} - Alkkemi Website`
         }),
       });
@@ -131,10 +135,12 @@ const AlkkemiWebsite = () => {
           message: ''
         });
       } else {
-        throw new Error('Failed to send message');
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Submission error:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -267,7 +273,7 @@ const AlkkemiWebsite = () => {
               isVisible['about-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            About Alkkemi
+            Experience Alkkemi
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
@@ -321,6 +327,160 @@ const AlkkemiWebsite = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* App Showcase Section */}
+      <section 
+        id="app-showcase" 
+        className="min-h-screen flex items-center justify-center py-20 relative overflow-hidden"
+        style={{
+          background: `
+            radial-gradient(ellipse 150% 100% at 50% 0%, rgba(139, 92, 246, 0.2), transparent 50%),
+            radial-gradient(ellipse 100% 80% at 80% 50%, rgba(59, 130, 246, 0.1), transparent 50%),
+            radial-gradient(ellipse 100% 80% at 20% 50%, rgba(236, 72, 153, 0.1), transparent 50%),
+            linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)
+          `
+        }}
+      >
+        <div className="container mx-auto px-6 text-center max-w-7xl relative z-10">
+          <h2 
+            data-animate
+            id="showcase-title"
+            className={`text-4xl lg:text-5xl font-light text-white mb-8 transition-all duration-1000 ${
+              isVisible['showcase-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            See Alkkemi In Action
+          </h2>
+          
+          <p 
+            data-animate
+            id="showcase-subtitle"
+            className={`text-lg text-blue-200 mb-4 max-w-3xl mx-auto transition-all duration-1000 ${
+              isVisible['showcase-subtitle'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            From AI conversations to comprehensive dictionaries, discover the complete language learning experience we've built for you.
+          </p>
+
+          <p 
+            data-animate
+            id="test-ready"
+            className={`text-xl text-gradient bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent font-semibold mb-16 transition-all duration-1000 ${
+              isVisible['test-ready'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            See if you're ready to take the language test
+          </p>
+
+          {/* Phone Mockups in a Row */}
+          <div 
+            data-animate
+            id="mockups-container"
+            className={`relative max-w-7xl mx-auto transition-all duration-1000 ${
+              isVisible['mockups-container'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
+              {[
+                {
+                  title: "Dictionary",
+                  description: "Comprehensive Japanese & Korean dictionary with examples",
+                  image: "mockup1.png",
+                  width: 200,
+                  height: Math.round(200 * (903/469))
+                },
+                {
+                  title: "Voice Mode", 
+                  description: "Perfect your pronunciation with AI-powered feedback",
+                  image: "mockup2.png",
+                  width: 200,
+                  height: Math.round(200 * (714/375))
+                },
+                {
+                  title: "Real-time Conversation",
+                  description: "Practice conversations with intelligent AI language partners", 
+                  image: "mockup3.png",
+                  width: 200,
+                  height: Math.round(200 * (772/387))
+                },
+                {
+                  title: "Sentence Correction",
+                  description: "Get instant feedback and corrections on your writing",
+                  image: "mockup4.png", 
+                  width: 200,
+                  height: Math.round(200 * (641/332))
+                },
+                {
+                  title: "Podcasts",
+                  description: "Learn through engaging audio content and stories",
+                  image: "mockup5.png",
+                  width: 200,
+                  height: Math.round(200 * (739/364))
+                }
+              ].map((feature, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col items-center justify-center transition-all duration-500 hover:scale-105"
+                  data-index={index}
+                >
+                  <div className="relative mb-6">
+                    <div 
+                      className="shadow-2xl hover:shadow-3xl transition-shadow duration-300 mx-auto rounded-[2rem] overflow-hidden"
+                      style={{ 
+                        width: `${feature.width}px`, 
+                        height: `${Math.min(feature.height, 400)}px`
+                      }}
+                    >
+                      <img 
+                        src={`/${feature.image}`} 
+                        alt={feature.title}
+                        className="w-full h-full object-contain rounded-[2rem]"
+                        onError={(e) => {
+                          const parent = e.target.parentNode;
+                          parent.innerHTML = `
+                            <div class="flex flex-col items-center justify-center h-full text-gray-400 bg-gray-900 rounded-[2rem]">
+                              <svg class="w-16 h-16 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                              </svg>
+                              <span class="text-sm font-medium">${feature.title}</span>
+                            </div>
+                          `;
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="text-center max-w-xs">
+                    <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+                    <p className="text-sm text-blue-200 opacity-90 leading-relaxed">{feature.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div 
+            data-animate
+            id="cta-section"
+            className={`mt-16 transition-all duration-1000 ${
+              isVisible['cta-section'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
+          >
+            <p className="text-blue-200 text-lg mb-6">Ready to transform your language learning journey?</p>
+            <button 
+              onClick={() => scrollToSection('contact')}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 px-8 py-4 rounded-full font-medium text-lg tracking-wide uppercase transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-blue-500/25 text-white"
+            >
+              Join the Waitlist
+            </button>
+          </div>
+        </div>
+        
+        {/* Floating Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-32 left-16 w-48 h-48 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mix-blend-multiply filter blur-xl opacity-5 animate-pulse"></div>
+          <div className="absolute bottom-32 right-16 w-64 h-64 bg-gradient-to-r from-pink-600 to-yellow-600 rounded-full mix-blend-multiply filter blur-xl opacity-5 animate-pulse animation-delay-2000"></div>
         </div>
       </section>
 
@@ -682,6 +842,11 @@ const AlkkemiWebsite = () => {
         
         html {
           scroll-behavior: smooth;
+        }
+        
+        /* Hide scrollbar for webkit browsers */
+        .overflow-x-auto::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
     </div>
