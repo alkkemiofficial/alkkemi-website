@@ -4,16 +4,26 @@ const AlkkemiWebsite = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [isVisible, setIsVisible] = useState({});
   const [isNavDark, setIsNavDark] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // GA4 Event Tracking Function
+  // GA4 Event Tracking Function with debugging
   const trackEvent = (eventName, parameters = {}) => {
+    console.log('🔍 Tracking event:', eventName, parameters);
+    console.log('🔍 GA4 available:', !!window.gtag);
+    
     if (window.gtag) {
+      console.log('✅ Firing GA4 event:', eventName);
       window.gtag('event', eventName, parameters);
+    } else {
+      console.log('❌ GA4 not loaded');
     }
   };
 
   useEffect(() => {
     const handleScroll = () => {
+      // Close mobile menu on scroll
+      setIsMobileMenuOpen(false);
+      
       const sections = ['hero', 'about', 'mission', 'team', 'contact'];
       const scrollPosition = window.scrollY + window.innerHeight / 2;
       
@@ -76,6 +86,23 @@ const AlkkemiWebsite = () => {
       observer.disconnect();
     };
   }, []);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMobileMenuOpen && !event.target.closest('nav')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   const scrollToSection = (sectionId) => {
     document.getElementById(sectionId).scrollIntoView({
@@ -208,6 +235,8 @@ const AlkkemiWebsite = () => {
                 Alkkemi
               </span>
             </div>
+            
+            {/* Desktop Navigation */}
             <div className="hidden md:flex space-x-8">
               {[
                 { id: 'hero', label: 'Home' },
@@ -239,24 +268,76 @@ const AlkkemiWebsite = () => {
                 </button>
               ))}
             </div>
+            
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button 
                 className={`transition-colors duration-500 ${
                   isNavDark ? 'text-gray-800' : 'text-white'
                 }`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   trackEvent('mobile_menu_click', {
-                    location: 'header'
+                    location: 'header',
+                    action: isMobileMenuOpen ? 'close' : 'open'
                   });
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
                 }}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  {isMobileMenuOpen ? (
+                    // X icon when menu is open
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    // Hamburger icon when menu is closed
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
                 </svg>
               </button>
             </div>
           </div>
+          
+          {/* Mobile Menu Dropdown */}
+          {isMobileMenuOpen && (
+            <div className={`md:hidden border-t transition-all duration-300 ${
+              isNavDark 
+                ? 'bg-white bg-opacity-90 border-gray-200' 
+                : 'bg-white bg-opacity-5 border-white border-opacity-10'
+            }`}>
+              <div className="px-6 py-4 space-y-4">
+                {[
+                  { id: 'hero', label: 'Home' },
+                  { id: 'about', label: 'About' },
+                  { id: 'mission', label: 'Mission' },
+                  { id: 'team', label: 'Team' },
+                  { id: 'contact', label: 'Contact' }
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      trackEvent('mobile_navigation_click', {
+                        section: item.label,
+                        location: 'mobile_menu'
+                      });
+                      scrollToSection(item.id);
+                      setIsMobileMenuOpen(false); // Close menu after click
+                    }}
+                    className={`block w-full text-left py-2 transition-colors duration-500 ${
+                      isNavDark 
+                        ? `text-gray-700 hover:text-blue-600 ${
+                            activeSection === item.id ? 'text-blue-600 font-medium' : ''
+                          }`
+                        : `text-white hover:text-blue-200 ${
+                            activeSection === item.id ? 'text-blue-200 font-medium' : ''
+                          }`
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -439,11 +520,11 @@ const AlkkemiWebsite = () => {
             <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
               {[
                 {
-                  title: "Dictionary",
-                  description: "Comprehensive Japanese & Korean dictionary with examples",
-                  image: "mockup1.png",
+                  title: "Sentence Correction",
+                  description: "Get instant feedback and corrections on your writing",
+                  image: "mockup4.png", 
                   width: 200,
-                  height: Math.round(200 * (903/469))
+                  height: Math.round(200 * (641/332))
                 },
                 {
                   title: "Voice Mode", 
@@ -460,11 +541,11 @@ const AlkkemiWebsite = () => {
                   height: Math.round(200 * (772/387))
                 },
                 {
-                  title: "Sentence Correction",
-                  description: "Get instant feedback and corrections on your writing",
-                  image: "mockup4.png", 
+                  title: "Dictionary",
+                  description: "Comprehensive Japanese & Korean dictionary with examples",
+                  image: "mockup1.png",
                   width: 200,
-                  height: Math.round(200 * (641/332))
+                  height: Math.round(200 * (903/469))
                 },
                 {
                   title: "Podcasts",
