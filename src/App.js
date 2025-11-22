@@ -834,7 +834,7 @@ const AlkkemiWebsite = () => {
               isVisible['contact-title'] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
             }`}
           >
-            Get In Touch
+            Want to experience it in real time? Join our BETA program
           </h2>
           
           <form 
