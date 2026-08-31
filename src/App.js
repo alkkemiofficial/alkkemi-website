@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Footer from './Footer';
 
 const AlkkemiWebsite = () => {
   const [activeSection, setActiveSection] = useState('hero');
@@ -949,6 +950,8 @@ const AlkkemiWebsite = () => {
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-gradient-to-r from-pink-600 to-orange-600 rounded-full mix-blend-multiply filter blur-xl opacity-5 animate-pulse animation-delay-3000"></div>
         </div>
       </section>
+
+      <Footer />
 
       <style jsx>{`
         @keyframes fade-in-up {
