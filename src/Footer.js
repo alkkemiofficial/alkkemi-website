@@ -1,22 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-const Footer = () => {
-  return (
-    <footer className="bg-slate-950 text-gray-400 py-10 border-t border-white border-opacity-10">
-      <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-sm">&copy; {new Date().getFullYear()} Alkkemi LLC. All rights reserved.</p>
-        <div className="flex gap-8 text-sm">
-          <Link to="/privacy-policy" className="hover:text-white transition-colors duration-300">
-            Privacy Policy
-          </Link>
-          <Link to="/terms-conditions" className="hover:text-white transition-colors duration-300">
-            Terms &amp; Conditions
-          </Link>
-        </div>
-      </div>
-    </footer>
-  );
-};
-
-export default Footer;
+export default function Footer() {
+  return <footer className="site-footer"><div className="section-shell"><div className="footer-top"><Link className="brand" to="/">alkkemi<span className="brand-dot">.</span></Link><p>A little curiosity. A little consistency.<br />A whole new world of words.</p><a className="text-link" href="mailto:alkkemi.official@gmail.com">Say hello <span aria-hidden="true">↗</span></a></div><div className="footer-bottom"><p>© {new Date().getFullYear()} Alkkemi LLC</p><nav aria-label="Footer navigation"><Link to="/our-story">Our story</Link><Link to="/founders">The founders</Link><Link to="/privacy-policy">Privacy policy</Link><Link to="/terms-conditions">Terms & conditions</Link></nav></div></div></footer>;
+}
