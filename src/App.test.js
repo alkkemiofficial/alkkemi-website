@@ -10,17 +10,17 @@ function renderWebsite(path = '/') {
   return render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/" element={<App />} /><Route path="/create-account" element={<CreateAccount />} /><Route path="/founders" element={<Founders />} /><Route path="/our-story" element={<OurStory />} /></Routes></MemoryRouter>);
 }
 
-test('a visitor can follow a word from a story into a study set and example practice', () => {
+test('a visitor can follow the real app journey from reading to practice', () => {
   renderWebsite();
   expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Little stories.Real progress.');
   expect(screen.queryByText(/join the waitlist/i)).not.toBeInTheDocument();
   expect(screen.queryByText(/dictionary/i)).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /explore the word/i }));
-  fireEvent.click(screen.getByRole('button', { name: /add to study set/i }));
-  expect(screen.getByText('Added to your example study set.')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /practice this word/i }));
-  fireEvent.click(screen.getByRole('button', { name: /show an example answer/i }));
-  expect(screen.getByText('この物語が好きです。')).toBeInTheDocument();
+  expect(screen.getAllByRole('img', { name: /reader showing a Japanese story/i })).toHaveLength(2);
+  fireEvent.click(screen.getByRole('button', { name: /next step/i }));
+  expect(screen.getByRole('tabpanel')).toHaveTextContent('Follow a little curiosity.');
+  expect(screen.getByRole('img', { name: /word detail screen/i })).toHaveAttribute('src', '/app-word-detail.png');
+  fireEvent.click(screen.getByRole('tab', { name: /practice your word/i }));
+  expect(screen.getByRole('img', { name: /practice screen/i })).toHaveAttribute('src', '/app-practice.png');
 });
 
 test('tour tabs support keyboard navigation', () => {
